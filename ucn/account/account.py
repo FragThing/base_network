@@ -1,10 +1,12 @@
 """Account info
 """
-from .key import KeyZip
+from .key import MultiKey
 
 
 class Account:
     """Account info saving class"""
+
+    def __init__(self, )
 
 
 class SubAccount:

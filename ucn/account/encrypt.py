@@ -1,5 +1,7 @@
 """Account key encryption"""
 from Crypto.PublicKey import ECC
+from Crypto.Signature import eddsa
+from Crypto.Hash import SHA512
 from abc import ABCMeta, abstractmethod
 
 
@@ -41,6 +43,14 @@ class KeyEncrypt(metadata=ABCMeta):
         Generally hash algorithm use SHA3 256 or better
         """
 
+    @abstractmethod
+    def sign(self, private_key_str: str, passphrase: str, data: bytes) -> bytes:
+        """Sign data by private_key"""
+
+    @abstractmethod
+    def verify(self, public_key_str: str, signature: bytes, data: bytes) -> bool:
+        """Sign data by private_key"""
+
 
 class Ed25519KeyEncrypt(KeyEncrypt):
     """ECC Ed25519 KeyEncrypt"""
@@ -73,6 +83,23 @@ class Ed25519KeyEncrypt(KeyEncrypt):
 
     def get_hash_content(self, public_key: str) -> str:
         return self.get_pem_content(public_key)
+
+    def sign(self, private_key_str: str, passphrase: str, data: bytes) -> bytes:
+        key = ECC.import_key(private_key_str, passphrase=passphrase)
+        signer = eddsa.new(key, mode="rfc8032")
+        prehashed_data = SHA512.new(data)
+        return signer.sign(prehashed_data)
+
+    def verify(self, public_key_str: str, signature: bytes, data: bytes) -> bool:
+        key = ECC.import_key(public_key_str)
+        verifier = eddsa.new(key, mode="rfc8032")
+        try:
+            verifier.verify(data, signature)
+            print("The message is authentic")
+            print(True)
+        except ValueError:
+            print("The message is not authentic")
+            print(False)
 
 
 KEY_ENCRYPT_MAP = dict((key.name, key()) for key in KeyEncrypt.__subclasses__())

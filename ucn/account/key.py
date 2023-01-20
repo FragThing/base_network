@@ -11,8 +11,8 @@ from ucn.account.encrypt import KEY_ENCRYPT_MAP
 class KeyStore:
     """Store key and load or save by json"""
 
-    public_key: str
-    private_key: str
+    public_key: bytes
+    private_key: bytes
     encryt_algo: str
 
     def loads(self, json_str: str):

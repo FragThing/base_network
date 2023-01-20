@@ -5,7 +5,7 @@ from Crypto.Hash import SHA512
 from abc import ABCMeta, abstractmethod
 
 
-KEY_EXPORT_FORMAT = "PEM"
+KEY_EXPORT_FORMAT = "DER"
 KEY_EXPORT_PROTECTION = "PBKDF2WithHMAC-SHA1AndAES128-CBC"
 
 
@@ -32,7 +32,7 @@ class KeyEncrypt(metadata=ABCMeta):
         """
 
     @abstractmethod
-    def gennerate_public_key(self, private_key_str: str, passphrase: str) -> str:
+    def gennerate_public_key(self, private_key_data, passphrase: str) -> str:
         """Gennerate public_key from a private_key
         if need, passphrase for decode private_key
         """
@@ -44,11 +44,11 @@ class KeyEncrypt(metadata=ABCMeta):
         """
 
     @abstractmethod
-    def sign(self, private_key_str: str, passphrase: str, data: bytes) -> bytes:
+    def sign(self, private_key_data, passphrase: str, data: bytes) -> bytes:
         """Sign data by private_key"""
 
     @abstractmethod
-    def verify(self, public_key_str: str, signature: bytes, data: bytes) -> bool:
+    def verify(self, public_key_data, signature: bytes, data: bytes) -> bool:
         """Sign data by private_key"""
 
 
@@ -69,29 +69,22 @@ class Ed25519KeyEncrypt(KeyEncrypt):
         )
         return key_str
 
-    def gennerate_public_key(self, private_key_str: str, passphrase: str) -> str:
-        key = ECC.import_key(private_key_str, passphrase=passphrase)
+    def gennerate_public_key(self, private_key_data, passphrase: str) -> str:
+        key = ECC.import_key(private_key_data, passphrase=passphrase)
         public_key_str = key.publickey().export_key(format=KEY_EXPORT_FORMAT)
         return public_key_str
 
-    @staticmethod
-    def get_pem_content(pem_str) -> str:
-        """Get PEM file content without start and end
-        to avoid Collision attack
-        """
-        return "\n".join(pem_str.split("\n")[1:-1])
+    def get_hash_content(self, public_key) -> str:
+        return public_key
 
-    def get_hash_content(self, public_key: str) -> str:
-        return self.get_pem_content(public_key)
-
-    def sign(self, private_key_str: str, passphrase: str, data: bytes) -> bytes:
-        key = ECC.import_key(private_key_str, passphrase=passphrase)
+    def sign(self, private_key_data: str, passphrase: str, data: bytes) -> bytes:
+        key = ECC.import_key(private_key_data, passphrase=passphrase)
         signer = eddsa.new(key, mode="rfc8032")
         prehashed_data = SHA512.new(data)
         return signer.sign(prehashed_data)
 
-    def verify(self, public_key_str: str, signature: bytes, data: bytes) -> bool:
-        key = ECC.import_key(public_key_str)
+    def verify(self, public_key_data: str, signature: bytes, data: bytes) -> bool:
+        key = ECC.import_key(public_key_data)
         verifier = eddsa.new(key, mode="rfc8032")
         try:
             verifier.verify(data, signature)

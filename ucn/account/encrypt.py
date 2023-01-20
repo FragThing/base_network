@@ -1,8 +1,8 @@
 """Account key encryption"""
+from abc import ABCMeta, abstractmethod
 from Crypto.PublicKey import ECC
 from Crypto.Signature import eddsa
 from Crypto.Hash import SHA512
-from abc import ABCMeta, abstractmethod
 
 
 KEY_EXPORT_FORMAT = "DER"
@@ -16,7 +16,7 @@ def save_key_to_file(file_path: str, key_str: str):
         f.write(key_str)
 
 
-class KeyEncrypt(metadata=ABCMeta):
+class KeyEncrypt(metaclass=ABCMeta):
     """KeyEncrypt base class, for define function"""
 
     @staticmethod
@@ -26,14 +26,14 @@ class KeyEncrypt(metadata=ABCMeta):
         """Encryt algorithm name"""
 
     @abstractmethod
-    def gennerate_private_key(self, passphrase: str) -> str:
-        """Gennerate private_key
+    def generate_private_key(self, passphrase: str) -> str:
+        """Generate private_key
         if need, use passphrase to protect private_key
         """
 
     @abstractmethod
-    def gennerate_public_key(self, private_key_data, passphrase: str) -> str:
-        """Gennerate public_key from a private_key
+    def generate_public_key(self, private_key_data, passphrase: str) -> str:
+        """Generate public_key from a private_key
         if need, passphrase for decode private_key
         """
 
@@ -42,7 +42,6 @@ class KeyEncrypt(metadata=ABCMeta):
         """Get content from a public_key which should been hash
         Generally hash algorithm use SHA3 256 or better
         """
-
     @abstractmethod
     def sign(self, private_key_data, passphrase: str, data: bytes) -> bytes:
         """Sign data by private_key"""
@@ -60,7 +59,7 @@ class Ed25519KeyEncrypt(KeyEncrypt):
     def name():
         return "Ed25519"
 
-    def gennerate_private_key(self, passphrase: str) -> str:
+    def generate_private_key(self, passphrase: str) -> str:
         key = ECC.generate(curve="Ed25519")
         key_str = key.export_key(
             passphrase=passphrase,
@@ -69,7 +68,7 @@ class Ed25519KeyEncrypt(KeyEncrypt):
         )
         return key_str
 
-    def gennerate_public_key(self, private_key_data, passphrase: str) -> str:
+    def generate_public_key(self, private_key_data, passphrase: str) -> str:
         key = ECC.import_key(private_key_data, passphrase=passphrase)
         public_key_str = key.publickey().export_key(format=KEY_EXPORT_FORMAT)
         return public_key_str

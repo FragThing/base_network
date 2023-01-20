@@ -1,6 +1,7 @@
 """Account info
 """
-from .key import MultiKey
+from ucn.account.key import MultiKey
+from ucn.account.url_parse import url_parse
 
 
 class Account:
@@ -15,4 +16,4 @@ class Account:
     @property
     def id_url(self) -> str:
         """Account id"""
-        return self.key.url
+        return url_parse.generate(self.key.encode_algo, self.key.key_list)

@@ -44,7 +44,7 @@ class URLParse:
             content += key_content
         return f"{scheme}://{self.encode(encode_algo, content)}"
 
-    def parse(self, url: str) -> (str, list):
+    def parse(self, url: str) -> [str, list or None]:
         """Parse URL to encode algorithm and keys"""
         scheme, encode_content = url.split("://", maxsplit=1)
         encode_algo, *key_algo_list = scheme.split("+")

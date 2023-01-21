@@ -1,5 +1,5 @@
 """Account key encryption"""
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractstaticmethod
 from Crypto.PublicKey import ECC
 from Crypto.Signature import eddsa
 from Crypto.Hash import SHA512
@@ -19,10 +19,8 @@ def save_key_to_file(file_path: str, key_str: str):
 class KeyEncrypt(metaclass=ABCMeta):
     """KeyEncrypt base class, for define function"""
 
-    @staticmethod
-    @property
-    @abstractmethod
-    def name():
+    @abstractstaticmethod
+    def get_name() -> str:
         """Encryt algorithm name"""
 
     @abstractmethod
@@ -42,6 +40,7 @@ class KeyEncrypt(metaclass=ABCMeta):
         """Get content from a public_key which should been hash
         Generally hash algorithm use SHA3 256 or better
         """
+
     @abstractmethod
     def sign(self, private_key_data, passphrase: str, data: bytes) -> bytes:
         """Sign data by private_key"""
@@ -55,8 +54,7 @@ class Ed25519KeyEncrypt(KeyEncrypt):
     """ECC Ed25519 KeyEncrypt"""
 
     @staticmethod
-    @property
-    def name():
+    def get_name() -> str:
         return "Ed25519"
 
     def generate_private_key(self, passphrase: str) -> str:
@@ -70,7 +68,7 @@ class Ed25519KeyEncrypt(KeyEncrypt):
 
     def generate_public_key(self, private_key_data, passphrase: str) -> str:
         key = ECC.import_key(private_key_data, passphrase=passphrase)
-        public_key_str = key.publickey().export_key(format=KEY_EXPORT_FORMAT)
+        public_key_str = key.public_key().export_key(format=KEY_EXPORT_FORMAT)
         return public_key_str
 
     def get_hash_content(self, public_key) -> str:
@@ -85,13 +83,12 @@ class Ed25519KeyEncrypt(KeyEncrypt):
     def verify(self, public_key_data: str, signature: bytes, data: bytes) -> bool:
         key = ECC.import_key(public_key_data)
         verifier = eddsa.new(key, mode="rfc8032")
+        prehashed_data = SHA512.new(data)
         try:
-            verifier.verify(data, signature)
-            print("The message is authentic")
-            print(True)
+            verifier.verify(prehashed_data, signature)
+            return True
         except ValueError:
-            print("The message is not authentic")
-            print(False)
+            return False
 
 
-KEY_ENCRYPT_MAP = dict((key.name, key()) for key in KeyEncrypt.__subclasses__())
+KEY_ENCRYPT_MAP = dict((key.get_name(), key()) for key in KeyEncrypt.__subclasses__())

@@ -3,7 +3,6 @@
 from ucn.account.key import MultiKey
 from ucn.account.url_parse import url_parse
 
-
 class Account:
     """Account info saving class
     No need Subaccount which is same private key but different public key

@@ -2,22 +2,21 @@
 Account New, Import
 Key New
 """
-from json import loads
-from ucn.utils import json_dumps
-from ucn.account.key import KeyStore, Key, MultiKey
 from ucn.account.wallet import Account
-from ucn.account.encrypt import KEY_ENCRYPT_MAP
+from ucn.encrypt.key import KeyStore, Key, MultiKey
+from ucn.encrypt.encrypt import KEY_ENCRYPT_MAP
+from ucn.utils import json_dumps
 
 DEF_ENCRYPT = "Ed25519"
 
 
-def new_account_by_json(key_store_json: str) -> Account:
+def new_account_by_json(key_data_list: list[dict[str, str]]) -> Account:
     """New account (from private key)"""
     return Account(
         MultiKey(
             [
-                Key(__gen_key_store(KeyStore.loads(json_dumps(j))))
-                for j in loads(key_store_json)
+                Key(__gen_key_store(KeyStore.load(j)))
+                for j in key_data_list
             ]
         )
     )
@@ -37,13 +36,12 @@ def new_account(key_store_list: list[KeyStore]) -> Account:
 
 def export_account(account: Account) -> str:
     """Export account key list as json"""
-    return json_dumps([loads(key.keystore.dumps()) for key in account.key.key_list])
+    return json_dumps([key.keystore.dump() for key in account.key.key_list])
 
 
-def import_account(json_str: str) -> Account:
-    """Import account from json string"""
-    json = loads(json_str)
-    return Account(MultiKey([Key(KeyStore.loads(json_dumps(j))) for j in json]))
+def import_account(key_data_list: list[dict[str, str]]) -> Account:
+    """Import account from (json) dict"""
+    return Account(MultiKey([Key(KeyStore.load(k)) for k in key_data_list]))
 
 
 def __gen_key_store(key_store: KeyStore) -> KeyStore:

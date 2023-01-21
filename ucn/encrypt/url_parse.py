@@ -2,7 +2,7 @@
 
 from hashlib import shake_256
 from base64 import b85encode, b85decode
-from ucn.account.key import Key, KeyStore
+from ucn.encrypt.key import Key, KeyStore
 
 
 class URLParse:
@@ -31,11 +31,15 @@ class URLParse:
         except KeyError:
             return None
 
-    def generate(self, encode_algo, key_list: list[Key]):
+    def decodable(self, encode_algo: str) -> bool:
+        """Check encode algorithm is decodable"""
+        return encode_algo in self.DECODE_MAP
+
+    def generate(self, encode_algo, key_list: list[Key]) -> str:
         """Generate URL by encode algorithm and keys"""
         scheme = f"{encode_algo}"
         content = ""
-        decodable = encode_algo in self.DECODE_MAP
+        decodable = self.decodable(encode_algo)
         for key in key_list:
             key_content = key.keystore.public_key
             scheme += f"+{key.keystore.encryt_algo}"
@@ -44,13 +48,13 @@ class URLParse:
             content += key_content
         return f"{scheme}://{self.encode(encode_algo, content)}"
 
-    def parse(self, url: str) -> [str, list or None]:
+    def parse(self, url: str) -> [str, list[str or Key]]:
         """Parse URL to encode algorithm and keys"""
         scheme, encode_content = url.split("://", maxsplit=1)
         encode_algo, *key_algo_list = scheme.split("+")
         content = self.decode(encode_algo, encode_content)
-        if encode_algo not in self.DECODE_MAP or content.strip():
-            return encode_algo, None
+        if not self.decodable(encode_algo) or content.strip():
+            return encode_algo, str
         key_list = []
         for key_algo_str in key_algo_list:
             key_algo_split = key_algo_str.rsplit(".", maxsplit=1)

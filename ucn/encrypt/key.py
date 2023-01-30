@@ -18,19 +18,23 @@ class KeyStore:
     @staticmethod
     def load(key_data: dict[str, str]):
         """Load public or private key from (json) dict"""
-        key_store = KeyStore(None, None)
-        key_store.public_key = b85decode(key_data["public_key"].encode("utf-8"))
-        key_store.private_key = b85decode(key_data["private_key"].encode("utf-8"))
-        key_store.encryt_algo = key_data["encryt_algo"]
-        return key_store
+        return KeyStore(
+            encryt_algo=key_data["encryt_algo"],
+            public_key=b85decode(key_data["public_key"].encode("utf-8")),
+            private_key=b85decode(key_data["private_key"].encode("utf-8")),
+        )
 
     def dump(self) -> dict[str, str]:
         """Dump public or private key to (json) dict"""
         return {
-                "public_key": b85encode(self.public_key).decode("utf-8"),
-                "private_key": b85encode(self.private_key).decode("utf-8"),
-                "encryt_algo": self.encryt_algo,
-            }
+            "public_key": b85encode(self.public_key).decode("utf-8"),
+            "private_key": b85encode(self.private_key).decode("utf-8"),
+            "encryt_algo": self.encryt_algo,
+        }
+
+    def set_passphrase(self, passphrase):
+        """Set passphrase individually"""
+        self.passphrase = passphrase
 
 
 class Key:
@@ -66,11 +70,11 @@ class MultiKey:
         """Get key_dict to easy search by kid"""
         return {key.keystore.public_key: key for key in self.key_list}
 
-    def sign(self, data: bytes) -> list[[bytes, bytes]]:
+    def sign(self, data: bytes) -> list[tuple[bytes, bytes]]:
         "Sign by keys, one by one"
         return [(key.keystore.public_key, key.sign(data)) for key in self.key_list]
 
-    def verify(self, data: bytes, key_signature_list: list[[bytes, bytes]]) -> str:
+    def verify(self, data: bytes, key_signature_list: list[tuple[bytes, bytes]]) -> str:
         """Verify data and return fraction(str) of reliability"""
         key_map = self.key_dict
         verified = 0

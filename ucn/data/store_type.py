@@ -6,7 +6,7 @@ from enum import Enum
 class StoreType(Enum):
     """Data storeroom type"""
 
-    RAW = "raw"
+    UCN = "ucn"
     IPFS = "ipfs"
     GNUNET = "gnunet"
     HTTP = "http"

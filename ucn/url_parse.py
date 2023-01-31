@@ -21,17 +21,21 @@ class URLParse:
         "Base85": lambda d: b85decode(d).decode("utf-8"),
     }
 
-    def encode(self, data: bytes, encode_algo: str = None) -> str:
+    def encode(
+        self, data: bytes, encode_algo: str = None, force_hash: bool = False
+    ) -> str:
         """Encode or Hash key_id content"""
         if not encode_algo:
-            encode_algo = self.__get_encoder(data)
+            encode_algo = self.__get_encoder(data, force_hash)
         encoder = self.ENCODE_MAP[encode_algo]
         return f"{encode_algo}://{encoder(data)}"
 
-    def __get_encoder(self, data: bytes):
+    def __get_encoder(self, data: bytes, force_hash: bool):
         """Get encoder by data length"""
         length = len(data)
         for max_length, encoder in self.ENCODE_LEN_MAP:
+            if force_hash and encoder in self.DECODE_MAP:
+                continue
             if max_length == -1:
                 return encoder
             if length <= max_length:
@@ -47,6 +51,18 @@ class URLParse:
             return self.DECODE_MAP[encode_algo](content)
         except KeyError:
             return None
+
+    @staticmethod
+    def get_scheme(url: str) -> list[str]:
+        """Get scheme list from URL"""
+        return url.split("://", maxsplit=1)[0].split("+")
+
+    @staticmethod
+    def reset_scheme(url: str, scheme_list: list[str]) -> str:
+        """Reset URL scheme"""
+        scheme = "+".join(scheme_list)
+        url_content = url.split("://", maxsplit=1)[1]
+        return f"{scheme}://{url_content}"
 
 
 url_parse = URLParse()

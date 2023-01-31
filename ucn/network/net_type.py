@@ -11,7 +11,7 @@ class BaseType(IntEnum):
 
 
 class AccountType(BaseType):
-    """Account type"""
+    """Account"""
 
     REGISTER = int(f"{VERSION}00")
     SEARCH = int(f"{VERSION}01")
@@ -19,16 +19,23 @@ class AccountType(BaseType):
 
 
 class PayType(BaseType):
-    """Pay type"""
+    """Pay"""
 
     PULL = int(f"{VERSION}10")
     PUSH = int(f"{VERSION}11")
 
 
 class LedgerType(BaseType):
-    """Ledger type"""
+    """Ledger"""
 
     RELEASE = int(f"{VERSION}20")
+
+
+class DataStoreType(BaseType):
+    """Data store"""
+
+    SAVE = int(f"{VERSION}30")
+    READ = int(f"{VERSION}31")
 
 
 TYPE_LIST = BaseType.__subclasses__()

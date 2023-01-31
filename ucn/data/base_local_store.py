@@ -6,14 +6,12 @@ To save:
 """
 from pathlib import Path
 from ucn.config import DATA_DIR_PATH
+from base64 import b85encode
 
-from ucn.data.base_store import BaseStore
 
-
-class LocalStore(BaseStore):
+class BaseLocalStore:
     """Local data store"""
 
-    FILE_PROXY = "file/proxy"
     FILE_STORE = "file/store"
 
     base_dir = Path(DATA_DIR_PATH)
@@ -33,8 +31,12 @@ class LocalStore(BaseStore):
     def __get_file_path(self, *path: str):
         file_path = self.base_dir
         for single_path in path:
-            file_path = file_path / single_path
+            file_path = file_path / self.__encode(single_path)
         return file_path
 
+    @staticmethod
+    def __encode(name) -> str:
+        return b85encode(name.encode("utf-8")).decode("utf-8")
 
-local_store = LocalStore()
+
+base_local_store = BaseLocalStore()

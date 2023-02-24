@@ -65,9 +65,9 @@ def import_account_with_sig(json_str: str) -> Account or None:
     account = import_account(data)
     sig = json_data["sig"]
     account_id = json_data["id"]
-    if account.id_url == account_id and int(Fraction(
-        account.key.verify(data.encode("utf-8"), sig_decode(sig))
-    )):
+    if account.id_url == account_id and int(
+        Fraction(account.key.verify(data.encode("utf-8"), sig_decode(sig)))
+    ):
         return account
     return None
 

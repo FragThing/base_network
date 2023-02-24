@@ -7,7 +7,8 @@ from ucn.encrypt.key import Key, KeyStore
 class KeyUrl:
     """Key URL parse and generate"""
 
-    def generate(self, key_list: list[Key], encode_algo: str = None) -> str:
+    @staticmethod
+    def generate(key_list: list[Key], encode_algo: str = None) -> str:
         """Generate URL by encode algorithm and keys"""
         content = b""
         for key in key_list:
@@ -16,7 +17,8 @@ class KeyUrl:
             content += b"%b\n" % keystore.public_key
         return url_parse.encode(content[:-1], encode_algo)
 
-    def parse(self, url: str) -> list[Key] or None:
+    @staticmethod
+    def parse(url: str) -> list[Key] or None:
         """Parse URL to encode algorithm and keys"""
         content = url_parse.decode(url)
         content_lines = content.split("\n")

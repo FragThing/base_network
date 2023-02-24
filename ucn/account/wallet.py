@@ -10,7 +10,7 @@ class Account:
     Like Bake Card
     """
 
-    def __init__(self, key: MultiKey, encode_algo: str):
+    def __init__(self, key: MultiKey, encode_algo: str = None):
         self.key = key
         self.encode_algo = encode_algo
 

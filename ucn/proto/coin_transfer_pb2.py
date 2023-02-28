@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19proto/coin_transfer.proto\x12\tucn.proto\"%\n\x04Sign\x12\x0f\n\x07\x61\x63\x63ount\x18\x01 \x01(\t\x12\x0c\n\x04sign\x18\x02 \x01(\x0c\"<\n\x08SignData\x12\"\n\tsign_list\x18\x01 \x03(\x0b\x32\x0f.ucn.proto.Sign\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\t\"+\n\x0b\x44\x65stination\x12\x0f\n\x07\x61\x63\x63ount\x18\x01 \x01(\t\x12\x0b\n\x03num\x18\x02 \x01(\x04\"H\n\x08Transfer\x12\x11\n\tcoin_list\x18\x01 \x03(\t\x12)\n\tdest_list\x18\x02 \x03(\x0b\x32\x16.ucn.proto.Destinationb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19proto/coin_transfer.proto\x12\tucn.proto\"%\n\x04Sign\x12\x0f\n\x07\x61\x63\x63ount\x18\x01 \x01(\t\x12\x0c\n\x04sign\x18\x02 \x01(\x0c\"<\n\x08SignData\x12\"\n\tsign_list\x18\x01 \x03(\x0b\x32\x0f.ucn.proto.Sign\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\t\"+\n\x0b\x44\x65stination\x12\x0f\n\x07\x61\x63\x63ount\x18\x01 \x01(\t\x12\x0b\n\x03num\x18\x02 \x01(\x04\")\n\x04\x43oin\x12\x10\n\x08\x62ill_url\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x63\x63ount\x18\x02 \x01(\t\"Y\n\x08Transfer\x12\"\n\tcoin_list\x18\x01 \x03(\x0b\x32\x0f.ucn.proto.Coin\x12)\n\tdest_list\x18\x02 \x03(\x0b\x32\x16.ucn.proto.Destination\"_\n\x04\x42ill\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x0c\n\x04root\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x04\x12%\n\x08transfer\x18\x04 \x01(\x0b\x32\x13.ucn.proto.Transferb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'proto.coin_transfer_pb2', globals())
@@ -26,6 +26,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _SIGNDATA._serialized_end=139
   _DESTINATION._serialized_start=141
   _DESTINATION._serialized_end=184
-  _TRANSFER._serialized_start=186
-  _TRANSFER._serialized_end=258
+  _COIN._serialized_start=186
+  _COIN._serialized_end=227
+  _TRANSFER._serialized_start=229
+  _TRANSFER._serialized_end=318
+  _BILL._serialized_start=320
+  _BILL._serialized_end=415
 # @@protoc_insertion_point(module_scope)

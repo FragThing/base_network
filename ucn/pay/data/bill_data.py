@@ -13,8 +13,8 @@ class BillData:
     root_bill_url: str
     # Timestamp of bill release time
     timestamp: float
-    # transfer list
-    transfer_list: list[TransferData]
+    # transfer data
+    transfer: TransferData
 
     # structure version
     version: int = 0

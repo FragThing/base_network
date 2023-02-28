@@ -1,13 +1,13 @@
 """Coin checker"""
-from ucn.pay.transfer import Transfer
+from ucn.pay.data.bill_data import BillData
 from ucn.ledger.ledger import ledger
 
 
 class Coin:
     """Check Coin data and num"""
 
-    def __init__(self, transfer: Transfer, account: str):
-        self.transfer = transfer
+    def __init__(self, bill: BillData, account: str):
+        self.bill = bill
         self.account = account
 
     def verify(self) -> int:

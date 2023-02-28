@@ -2,13 +2,13 @@
 for search and store transfer
 """
 
-from ucn.pay.data.transfer_data import TransferData
+from ucn.pay.data.bill_data import BillData
 
 
 class Ledger:
     """Coin transfer ledger"""
 
-    def get(self, url: str) -> TransferData:
+    def get(self, url: str) -> BillData:
         """Get transfer data"""
         return
 

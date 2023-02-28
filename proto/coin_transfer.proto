@@ -2,21 +2,33 @@ syntax = "proto3";
 package ucn.proto;
 
 message Sign {
-    string account = 1;
-    bytes sign = 2;
+  string account = 1;
+  bytes sign = 2;
 }
 
 message SignData {
-    repeated Sign sign_list = 1;
-    string data = 2;
+  repeated Sign sign_list = 1;
+  string data = 2;
 }
 
 message Destination {
-    string account = 1;
-    uint64 num = 2;
+  string account = 1;
+  uint64 num = 2;
+}
+
+message Coin {
+  string bill_url = 1;
+  string account = 2;
 }
 
 message Transfer {
-    repeated string coin_list = 1;
-    repeated Destination dest_list = 2;
+  repeated Coin coin_list = 1;
+  repeated Destination dest_list = 2;
+}
+
+message Bill {
+  uint32 version = 1;
+  string root = 2;
+  uint64 timestamp = 3;
+  Transfer transfer = 4;
 }

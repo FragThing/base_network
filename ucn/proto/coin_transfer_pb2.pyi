@@ -5,6 +5,26 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class Bill(_message.Message):
+    __slots__ = ["root", "timestamp", "transfer", "version"]
+    ROOT_FIELD_NUMBER: _ClassVar[int]
+    TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    TRANSFER_FIELD_NUMBER: _ClassVar[int]
+    VERSION_FIELD_NUMBER: _ClassVar[int]
+    root: str
+    timestamp: int
+    transfer: Transfer
+    version: int
+    def __init__(self, version: _Optional[int] = ..., root: _Optional[str] = ..., timestamp: _Optional[int] = ..., transfer: _Optional[_Union[Transfer, _Mapping]] = ...) -> None: ...
+
+class Coin(_message.Message):
+    __slots__ = ["account", "bill_url"]
+    ACCOUNT_FIELD_NUMBER: _ClassVar[int]
+    BILL_URL_FIELD_NUMBER: _ClassVar[int]
+    account: str
+    bill_url: str
+    def __init__(self, bill_url: _Optional[str] = ..., account: _Optional[str] = ...) -> None: ...
+
 class Destination(_message.Message):
     __slots__ = ["account", "num"]
     ACCOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -33,6 +53,6 @@ class Transfer(_message.Message):
     __slots__ = ["coin_list", "dest_list"]
     COIN_LIST_FIELD_NUMBER: _ClassVar[int]
     DEST_LIST_FIELD_NUMBER: _ClassVar[int]
-    coin_list: _containers.RepeatedScalarFieldContainer[str]
+    coin_list: _containers.RepeatedCompositeFieldContainer[Coin]
     dest_list: _containers.RepeatedCompositeFieldContainer[Destination]
-    def __init__(self, coin_list: _Optional[_Iterable[str]] = ..., dest_list: _Optional[_Iterable[_Union[Destination, _Mapping]]] = ...) -> None: ...
+    def __init__(self, coin_list: _Optional[_Iterable[_Union[Coin, _Mapping]]] = ..., dest_list: _Optional[_Iterable[_Union[Destination, _Mapping]]] = ...) -> None: ...

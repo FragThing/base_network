@@ -15,6 +15,10 @@ class KeyStore:
     private_key: bytes = None
     passphrase: str or None = None
 
+    def __post_init__(self):
+        if self.encryt_algo not in KEY_ENCRYPT_MAP:
+            raise ValueError(f"Invalid encryption algorithm: {self.encryt_algo}")
+
     @staticmethod
     def load(key_data: dict[str, str]):
         """Load public or private key from (json) dict"""

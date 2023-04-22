@@ -3,7 +3,7 @@
 
 from fractions import Fraction
 from ucn.encrypt.key import MultiKey, Key, KeyStore
-from ucn.encrypt.url_parse import url_parse
+from ucn.url_parse import url_parse
 
 
 def generate_transfer_key_header(

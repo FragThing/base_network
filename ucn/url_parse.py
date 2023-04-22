@@ -18,7 +18,7 @@ class URLParse:
     }
 
     DECODE_MAP = {
-        "Base85": lambda d: b85decode(d).decode("utf-8"),
+        "Base85": lambda d: b85decode(d),
     }
 
     def encode(
@@ -33,7 +33,7 @@ class URLParse:
     def __get_encoder(self, data: bytes, force_hash: bool):
         """Get encoder by data length"""
         length = len(data)
-        for max_length, encoder in self.ENCODE_LEN_MAP:
+        for max_length, encoder in self.ENCODE_LEN_MAP.items():
             if force_hash and encoder in self.DECODE_MAP:
                 continue
             if max_length == -1:

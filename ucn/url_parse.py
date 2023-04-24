@@ -52,6 +52,11 @@ class URLParse:
         except KeyError:
             return None
 
+    def decodable_algo(self, encode_algo: str) -> bool:
+        """Check key_id content is decodable
+        """
+        return encode_algo in self.DECODE_MAP
+
     @staticmethod
     def get_scheme(url: str) -> list[str]:
         """Get scheme list from URL"""

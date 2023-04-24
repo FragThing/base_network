@@ -19,7 +19,7 @@ def key_store(key_encrypt_obj):
     private_key = key_encrypt_obj.generate_private_key(PASSPHRASE)
     public_key = key_encrypt_obj.generate_public_key(private_key, PASSPHRASE)
     return KeyStore(
-        encryt_algo=key_encrypt_obj.get_name(),
+        encrypt_algo=key_encrypt_obj.get_name(),
         public_key=public_key,
         private_key=private_key,
         passphrase=PASSPHRASE,
@@ -32,7 +32,7 @@ def key_store2(key_encrypt_obj):
     private_key = key_encrypt_obj.generate_private_key(PASSPHRASE)
     public_key = key_encrypt_obj.generate_public_key(private_key, PASSPHRASE)
     return KeyStore(
-        encryt_algo=key_encrypt_obj.get_name(),
+        encrypt_algo=key_encrypt_obj.get_name(),
         public_key=public_key,
         private_key=private_key,
         passphrase=PASSPHRASE,

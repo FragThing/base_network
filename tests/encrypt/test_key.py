@@ -22,7 +22,7 @@ def test_key_store_load_dump(key_store):
     """Test KeyStore.load and KeyStore.dump functions."""
     key_data = key_store.dump()
     loaded_key_store = KeyStore.load(key_data)
-    assert key_store.encryt_algo == loaded_key_store.encryt_algo
+    assert key_store.encrypt_algo == loaded_key_store.encrypt_algo
     assert key_store.public_key == loaded_key_store.public_key
     assert key_store.private_key == loaded_key_store.private_key
 
@@ -43,28 +43,40 @@ def test_key_sign_verify(key_store):
 
 
 def test_multi_key_sign_verify_same_key_store(key_store):
-    """Test MultiKey.sign and MultiKey.verify functions using the same key store."""
+    """
+    Test MultiKey.sign and MultiKey.verify functions
+    using the same key store.
+    """
     key1 = Key(key_store)
     key2 = Key(key_store)
 
     multi_key = MultiKey([key1, key2])
     key_signature_list = multi_key.sign(DATA_TO_SIGN)
 
-    reliability_fraction = multi_key.verify(DATA_TO_SIGN, key_signature_list)
-    assert (
-        reliability_fraction == "2/1"
-    )  # Both keys should have successfully verified the data, but there's only one actual key.
+    reliability_fraction = multi_key.verify(
+        DATA_TO_SIGN,
+        [(key.keystore.public_key, signature) for key, signature in key_signature_list],
+    )
+    assert reliability_fraction == "2/1"
+    # Both keys should have successfully verified the data,
+    # but there's only one actual key.
 
 
 def test_multi_key_sign_verify_different_key_stores(key_store, key_store2):
-    """Test MultiKey.sign and MultiKey.verify functions using different key stores."""
+    """
+    Test MultiKey.sign and MultiKey.verify functions
+    using different key stores.
+    """
     key1 = Key(key_store)
     key2 = Key(key_store2)
 
     multi_key = MultiKey([key1, key2])
     key_signature_list = multi_key.sign(DATA_TO_SIGN)
 
-    reliability_fraction = multi_key.verify(DATA_TO_SIGN, key_signature_list)
+    reliability_fraction = multi_key.verify(
+        DATA_TO_SIGN,
+        [(key.keystore.public_key, signature) for key, signature in key_signature_list],
+    )
     assert (
         reliability_fraction == "2/2"
     )  # Both keys should have successfully verified the data
@@ -83,7 +95,10 @@ def test_multi_key_sign_verify_one_failure(key_store):
         (key_signature_list_correct[0][0], b"Tampered signature"),
         key_signature_list_correct[1],
     ]
-    reliability_fraction = multi_key.verify(DATA_TO_SIGN, key_signature_list_tampered)
+    reliability_fraction = multi_key.verify(
+        DATA_TO_SIGN,
+        [(key.keystore.public_key, signature) for key, signature in key_signature_list_tampered],
+    )
     assert (
         reliability_fraction == "1/1"
     )  # Only one key should have successfully verified the data.
@@ -122,7 +137,7 @@ def test_key_store_with_invalid_encryption_algorithm(key_store):
     """Test KeyStore with an invalid encryption algorithm."""
     with pytest.raises(ValueError):
         KeyStore(
-            encryt_algo="invalid_algorithm",
+            encrypt_algo="invalid_algorithm",
             public_key=key_store.public_key,
             private_key=key_store.private_key,
             passphrase=PASSPHRASE,

@@ -2,53 +2,66 @@
 """
 
 from fractions import Fraction
+from ucn.utils import data_bytes_list_to_string, data_string_to_bytes_list
 from ucn.encrypt.key import MultiKey, Key, KeyStore
-from ucn.url_parse import url_parse
+from ucn.encrypt.key_url import key_url, url_parse
 
 
 def generate_transfer_key_header(
-    encode_algo: str, multikey: MultiKey, data: bytes
+    multikey: MultiKey, encode_algo: str, data: bytes
 ) -> bytes:
     """Generate transfer key header"""
-    transfer_header = b""
-    key_url = url_parse.generate(encode_algo, multikey.decoder)
-    transfer_header += b"%b\n" % key_url
-    key_decodable = url_parse.decodable(encode_algo)
-    for public_key, signature in multikey.sign(data):
+    header_list = []
+    key_url_str = key_url.generate(multikey.key_list, encode_algo)
+    header_list.append(key_url_str.encode("utf8"))
+    key_decodable = url_parse.decodable_algo(encode_algo)
+    for key, signature in multikey.sign(data):
+        keystore = key.keystore
         if not key_decodable:
-            transfer_header += b"%b\n" % public_key
-        transfer_header += b"%b\n" % signature
-    return transfer_header
+            header_list.append(keystore.encrypt_algo.encode("utf8"))
+            header_list.append(keystore.public_key)
+        header_list.append(signature)
+    header_data = data_bytes_list_to_string(header_list).encode("utf8")
+    header_size = str(len(header_data)).encode("utf8")
+    return header_size + b"\n" + header_data
 
 
 def verify_transfer_key_header_and_get_data(data: bytes) -> bytes or None:
     """Verify transfer key header by signature
     And practice data
     Or drop if reliability < 1"""
-    key_url_bytes, data = data.split(b"\n", maxsplit=1)
-    key_url = key_url_bytes.decode("utf-8")
-    encode_algo, key_list = url_parse.parse(key_url)
-    key_decodable = url_parse.decodable(encode_algo)
-    if key_decodable:
-        multikey = MultiKey(key_list)
+    header_size_bytes, data = data.split(b"\n", maxsplit=1)
+    header_size = int(header_size_bytes.decode("utf8"))
+    header, data = (data[:header_size], data[header_size:])
+    header_list = data_string_to_bytes_list(header.decode("utf8"))
+    key_url_bytes = header_list.pop(0)
+    key_url_str = key_url_bytes.decode("utf-8")
+    key_list = key_url.parse(key_url_str)
     key_signature_list = []
-    for _ in key_list:
-        if key_decodable:
-            signature, data = data.split(b"\n", maxsplit=1)
+    i = 0
+    if key_list is None:
+        key_list_complete = []
+    else:
+        key_list_complete = key_list
+    while header_list:
+        if key_list is None:
+            encrypt_algo = header_list.pop(0).decode("utf8")
+            public_key = header_list.pop(0)
+            key = Key(KeyStore(encrypt_algo=encrypt_algo, public_key=public_key))
+            key_list_complete.append(key)
         else:
-            public_key, signature, data = data.split(b"\n", maxsplit=2)
-        key_signature_list.append((public_key, signature))
-    if not key_decodable:
-        multikey = MultiKey(
-            [
-                Key(KeyStore(encrypt_algo, public_key))
-                for encrypt_algo, public_key, _ in zip(key_list, key_signature_list)
-            ]
-        )
-        if url_parse.generate(encode_algo, multikey.key_list).decode("utf-8") != key_url:
-            return None
+            key = key_list[i]
+            i += 1
+        signature = header_list.pop(0)
+        key_signature_list.append((key.keystore.public_key, signature))
+    if key_list is None:
+        multikey = MultiKey(key_list_complete)
+    else:
+        multikey = MultiKey(key_list)
+    encode_algo = key_url_str.split("://", maxsplit=1)[0]
+    if key_url.generate(multikey.key_list, encode_algo) != key_url_str:
+        return None
     reliability = multikey.verify(data, key_signature_list)
     if int(Fraction(reliability)):
-        # if reliability == 1
         return data
     return None

@@ -10,20 +10,20 @@ from ucn.encrypt.encrypt import KEY_ENCRYPT_MAP
 class KeyStore:
     """Store key and load or save by json"""
 
-    encryt_algo: str
+    encrypt_algo: str
     public_key: bytes
     private_key: bytes = None
     passphrase: str or None = None
 
     def __post_init__(self):
-        if self.encryt_algo not in KEY_ENCRYPT_MAP:
-            raise ValueError(f"Invalid encryption algorithm: {self.encryt_algo}")
+        if self.encrypt_algo not in KEY_ENCRYPT_MAP:
+            raise ValueError(f"Invalid encryption algorithm: {self.encrypt_algo}")
 
     @staticmethod
     def load(key_data: dict[str, str]):
         """Load public or private key from (json) dict"""
         return KeyStore(
-            encryt_algo=key_data["encryt_algo"],
+            encrypt_algo=key_data["encrypt_algo"],
             public_key=b85decode(key_data["public_key"].encode("utf-8")),
             private_key=b85decode(key_data["private_key"].encode("utf-8")),
         )
@@ -33,7 +33,7 @@ class KeyStore:
         return {
             "public_key": b85encode(self.public_key).decode("utf-8"),
             "private_key": b85encode(self.private_key).decode("utf-8"),
-            "encryt_algo": self.encryt_algo,
+            "encrypt_algo": self.encrypt_algo,
         }
 
     def set_passphrase(self, passphrase):
@@ -50,7 +50,7 @@ class Key:
     @property
     def key_encrypt(self):
         """Get KeyEncrypt of the key"""
-        return KEY_ENCRYPT_MAP[self.keystore.encryt_algo]
+        return KEY_ENCRYPT_MAP[self.keystore.encrypt_algo]
 
     def sign(self, data: bytes) -> bytes:
         """Sign data"""
@@ -74,9 +74,9 @@ class MultiKey:
         """Get key_dict to easy search by kid"""
         return {key.keystore.public_key: key for key in self.key_list}
 
-    def sign(self, data: bytes) -> list[tuple[bytes, bytes]]:
+    def sign(self, data: bytes) -> list[tuple[Key, bytes]]:
         "Sign by keys, one by one"
-        return [(key.keystore.public_key, key.sign(data)) for key in self.key_list]
+        return [(key, key.sign(data)) for key in self.key_list]
 
     def verify(self, data: bytes, key_signature_list: list[tuple[bytes, bytes]]) -> str:
         """Verify data and return fraction(str) of reliability"""

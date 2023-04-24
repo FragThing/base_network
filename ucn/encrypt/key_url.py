@@ -1,6 +1,6 @@
 """Key URL parse and generate"""
 
-from base64 import b85encode, b85decode
+from ucn.utils import data_bytes_to_string, data_string_to_bytes
 from ucn.url_parse import url_parse
 from ucn.encrypt.key import Key, KeyStore
 
@@ -15,14 +15,6 @@ class KeyURLException(Exception):
 class KeyUrl:
     """Key URL parse and generate"""
 
-    @staticmethod
-    def __encode_bytes(data: bytes):
-        return b85encode(data)
-
-    @staticmethod
-    def __decode_bytes(data: bytes):
-        return b85decode(data)
-
     def generate(self, key_list: list[Key], encode_algo: str = None) -> str:
         """
         Generate URL by encode algorithm and keys.
@@ -31,16 +23,16 @@ class KeyUrl:
         :param encode_algo: Encoding algorithm to use for the URL.
         :return: Encoded URL string.
         """
-        content = b""
+        content = ""
         for key in key_list:
             keystore = key.keystore
-            content += b"%b\n" % self.__encode_bytes(
-                keystore.encryt_algo.encode("utf8")
+            content += (
+                f"{keystore.encrypt_algo}\n"
+                f"{data_bytes_to_string(keystore.public_key)}\n"
             )
-            content += b"%b\n" % self.__encode_bytes(keystore.public_key)
         if encode_algo is None:
             encode_algo = "Base85"
-        return url_parse.encode(content[:-1], encode_algo)
+        return url_parse.encode(content.encode("utf8")[:-1], encode_algo)
 
     def parse(self, url: str) -> list[Key] or None:
         """
@@ -62,16 +54,14 @@ class KeyUrl:
         :return: List of Key objects or None if parsing fails.
         """
         content = url_parse.decode(url)
-        content_lines = content.split(b"\n")
-        if not content_lines:
+        if content is None:
             return None
+        content_lines = content.decode("utf8").split("\n")
         key_list = []
         for i in range(0, len(content_lines), 2):
-            encryt_algo, public_key = (
-                self.__decode_bytes(content_lines[i]).decode("utf-8"),
-                self.__decode_bytes(content_lines[i + 1]),
-            )
-            key = Key(KeyStore(encryt_algo=encryt_algo, public_key=public_key))
+            encrypt_algo = content_lines[i]
+            public_key = data_string_to_bytes(content_lines[i + 1])
+            key = Key(KeyStore(encrypt_algo=encrypt_algo, public_key=public_key))
             key_list.append(key)
         return key_list
 

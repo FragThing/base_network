@@ -38,18 +38,21 @@ def verify_transfer_key_header_and_get_data(data: bytes) -> bytes or None:
     key_url_str = key_url_bytes.decode("utf-8")
     key_list = key_url.parse(key_url_str)
     key_signature_list = []
-    i = 0
     if key_list is None:
         key_list_complete = []
     else:
         key_list_complete = key_list
+    i = 0
+    print(header_list)
     while header_list:
+        encrypt_algo = header_list.pop(0).decode("utf8")
         if key_list is None:
-            encrypt_algo = header_list.pop(0).decode("utf8")
             public_key = header_list.pop(0)
             key = Key(KeyStore(encrypt_algo=encrypt_algo, public_key=public_key))
             key_list_complete.append(key)
         else:
+            print(key_list)
+            print(i)
             key = key_list[i]
             i += 1
         signature = header_list.pop(0)

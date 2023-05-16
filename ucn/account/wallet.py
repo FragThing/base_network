@@ -29,3 +29,6 @@ class Account:
     @property
     def balance(self) -> float:
         """Account balance for pay"""
+
+
+current_account = None

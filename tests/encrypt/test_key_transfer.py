@@ -5,7 +5,6 @@ in the ucn.encrypt package.
 
 import pytest
 from ucn.utils import data_bytes_list_to_string, data_string_to_bytes_list
-from ucn.encrypt.key import MultiKey, Key
 from ucn.encrypt.key_transfer import (
     generate_transfer_key_header,
     verify_transfer_key_header_and_get_data,
@@ -13,26 +12,9 @@ from ucn.encrypt.key_transfer import (
 
 
 @pytest.fixture
-def multikey(key_store, key_store2):
-    """
-    Fixture for creating a MultiKey object with two keys
-    from the given key stores.
-    """
-    key1 = Key(key_store)
-    key2 = Key(key_store2)
-    return MultiKey([key1, key2])
-
-
-@pytest.fixture
 def data():
     """Fixture for sample data used in testing."""
     return b"Sample data for testing"
-
-
-@pytest.fixture(params=["Base85", "SHAKE256"])
-def encode_algo(request):
-    """Fixture for parameterized encoding algorithm."""
-    return request.param
 
 
 def test_generate_transfer_key_header(multikey, encode_algo, data):

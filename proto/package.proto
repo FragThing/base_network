@@ -1,0 +1,9 @@
+syntax = "proto3";
+package ucn.proto;
+
+message TransferHeader {
+  string source = 1;
+  string protocol = 2;
+  uint64 length = 3;
+  uint32 checksum = 4;
+}

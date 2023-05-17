@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+// The PublicKey message represents a public key.
+// It includes the algorithm used and the key itself.
+message PublicKey {
+  string algorithm = 1; // The algorithm used for the key
+  bytes key = 2;        // The public key
+}
+
+// The AccountBlock message represents an account's initial registration block.
+// It includes the creation timestamp and a list of the account's public keys.
+// Additional blocks can be added for extensibility.
+message AccountBlock {
+  int64 creation_time = 1; // The creation timestamp of the account
+  repeated PublicKey public_keys =
+      2; // A list of public keys associated with the account
+}
+
+// The AdditionalBlock message represents additional blocks that can be added to
+// an account. It includes the block's protocol, the hash of the
+// account block it's associated with, and data.
+message AdditionalBlock {
+  string protocol = 1;           // The protocol used for this block
+  string account_block_hash = 2; // The hash of the associated account block
+  bytes data = 3;                // The data contained in this block
+}

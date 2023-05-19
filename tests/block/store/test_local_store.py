@@ -169,3 +169,61 @@ def test_block_hash(local_block_store):
         block = local_block_store.get_block(added_block_hash)
         assert local_block_store.get_hash(block) == added_block_hash
         previous_hash = added_block_hash
+
+
+def test_remove_block(local_block_store):
+    """
+    Test removing a block by its hash.
+    """
+    # Prepare test data
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add several blocks
+    previous_hash = ""
+    added_block_hashes = []
+    for i in range(3):
+        block_hash = local_block_store.add_block(protocol, data, previous_hash)
+        added_block_hashes.append(block_hash)
+        previous_hash = block_hash
+
+    # Remove the block at index 1 by its hash and all blocks that follow it
+    removed_blocks = local_block_store.remove_block(added_block_hashes[1])
+
+    # Check if the removed blocks have the same hash as the added blocks
+    assert [
+        local_block_store.get_hash(block) for block in removed_blocks
+    ] == added_block_hashes[1:]
+
+    # The blocks should no longer exist in the store
+    for block_hash in added_block_hashes[1:]:
+        assert local_block_store.get_block(block_hash) is None
+
+
+def test_remove_block_by_index(local_block_store):
+    """
+    Test removing a block by its index.
+    """
+    # Prepare test data
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add several blocks
+    previous_hash = ""
+    added_block_hashes = []
+    for i in range(3):
+        block_hash = local_block_store.add_block(protocol, data, previous_hash)
+        added_block_hashes.append(block_hash)
+        previous_hash = block_hash
+
+    # Remove the block at index 1 and all blocks that follow it
+    removed_blocks = local_block_store.remove_block_by_index(1)
+
+    # Check if the removed blocks have the same hash as the added blocks
+    assert [
+        local_block_store.get_hash(block) for block in removed_blocks
+    ] == added_block_hashes[1:]
+
+    # The blocks should no longer exist in the store
+    for i in range(1, 3):
+        assert local_block_store.get_block_by_index(i) is None

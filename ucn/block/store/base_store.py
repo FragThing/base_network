@@ -25,6 +25,14 @@ class BaseBlockStore(metaclass=ABCMeta):
     def get_block_count(self) -> int:
         return 0
 
+    @abstractmethod
+    def remove_block(self, block_hash: str) -> list[BasicBlock]:
+        pass
+
+    @abstractmethod
+    def remove_block_by_index(self, block_index: int) -> list[BasicBlock]:
+        pass
+
     @staticmethod
     def get_hash(block: BasicBlock) -> str:
         # Ensure block is a protobuf message

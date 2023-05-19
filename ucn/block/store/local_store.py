@@ -108,6 +108,63 @@ class LocalBlockStore(BaseBlockStore):
             # Return the total count of blocks in the database
             return session.query(self.BLOCK_MODEL).count()
 
+    def remove_block(self, block_hash: str) -> list[BasicBlock]:
+        with Session(self.engine) as session:
+            # Retrieve the block model with the specified block hash and all the blocks that follow it
+            block_models = (
+                session.query(self.BLOCK_MODEL)
+                .filter(
+                    self.BLOCK_MODEL.block_index
+                    >= session.query(self.BLOCK_MODEL.block_index)
+                    .filter(self.BLOCK_MODEL.block_hash == block_hash)
+                    .scalar()
+                )
+                .order_by(self.BLOCK_MODEL.block_index.asc())
+                .all()
+            )
+
+            blocks = []
+            for block_model in block_models:
+                # Convert each block model to a BasicBlock object
+                block = BasicBlock(
+                    protocol=block_model.protocol,
+                    previous_block_hash=block_model.previous_block_hash,
+                    data=block_model.data,
+                )
+                blocks.append(block)
+
+                # Remove the block from the database
+                session.delete(block_model)
+
+            session.commit()
+            return blocks
+
+    def remove_block_by_index(self, block_index: int) -> list[BasicBlock]:
+        with Session(self.engine) as session:
+            # Retrieve the block model with the specified block index and all the blocks that follow it
+            block_models = (
+                session.query(self.BLOCK_MODEL)
+                .filter(self.BLOCK_MODEL.block_index >= block_index)
+                .order_by(self.BLOCK_MODEL.block_index.asc())
+                .all()
+            )
+
+            blocks = []
+            for block_model in block_models:
+                # Convert each block model to a BasicBlock object
+                block = BasicBlock(
+                    protocol=block_model.protocol,
+                    previous_block_hash=block_model.previous_block_hash,
+                    data=block_model.data,
+                )
+                blocks.append(block)
+
+                # Remove the block from the database
+                session.delete(block_model)
+
+            session.commit()
+            return blocks
+
 
 # Create an engine
 engine = create_engine("sqlite:///:memory:")

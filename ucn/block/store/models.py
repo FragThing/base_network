@@ -6,17 +6,18 @@ Base = declarative_base()
 
 class BasicBlockModel(Base):
     __abstract__ = True
-    id = Column(Integer, primary_key=True)
     protocol = Column(String)
     data = Column(LargeBinary)
-    previous_block_hash = Column(String)
+    block_hash = Column(String, index=True, unique=True)
+    previous_block_hash = Column(String, nullable=True)
+    block_index = Column(Integer, primary_key=True)
 
 
 class BlockModel(BasicBlockModel):
     __tablename__ = "blocks"
 
 
-MODEL_MAP = {cls.__tablename__: cls for cls in BasicBlockModel.__subclasses__()}
+BLOCK_MODEL_MAP = {cls.__tablename__: cls for cls in BasicBlockModel.__subclasses__()}
 
 
 def init_database(engine: Engine):
@@ -24,4 +25,4 @@ def init_database(engine: Engine):
 
 
 def get_block_model(tablename: str = "blocks"):
-    return MODEL_MAP[tablename]
+    return BLOCK_MODEL_MAP[tablename]

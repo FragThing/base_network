@@ -1,57 +1,171 @@
+import pytest
 from sqlalchemy import create_engine
 from ucn.block.store.local_store import LocalBlockStore
-
-# Create an engine for testing
-engine = create_engine("sqlite:///:memory:")
-
-# Create a new instance of the LocalBlockStore class for testing
-local_block_store = LocalBlockStore(engine)
+from ucn.block.error import InvalidPreviousBlockHashError, MissingGenesisBlockError
 
 
-def test_add_block():
+@pytest.fixture
+def local_block_store():
+    """Provide a fresh LocalBlockStore instance with an in-memory database for each test."""
+    engine = create_engine("sqlite:///:memory:")
+    return LocalBlockStore(engine)
+
+
+def test_add_and_retrieve_genesis_block(local_block_store):
     """
-    Test the add_block function of the LocalBlockStore class.
-
-    This test covers the following cases:
-    - Adding a block with a normal protocol, data, and previous block hash.
-    """
-    # Prepare test data
-    protocol = "test_protocol"
-    data = b"test_data"
-    previous_block_hash = "test_previous_block_hash"
-
-    # Add a block
-    block = local_block_store.add_block(protocol, data, previous_block_hash)
-
-    # Check if the block is correctly added
-    assert block.protocol == protocol
-    assert block.data == data
-    assert block.previous_block_hash == previous_block_hash
-
-
-def test_get_block():
-    """
-    Test the get_block function of the LocalBlockStore class.
-
-    This test covers the following cases:
-    - Retrieving a block that exists in the store.
-    - Attempting to retrieve a block that does not exist in the store.
+    Test adding a genesis block and retrieving it by hash.
+    The genesis block is the first block in the blockchain.
     """
     # Prepare test data
     protocol = "test_protocol"
     data = b"test_data"
-    previous_block_hash = "test_previous_block_hash"
 
-    # Add a block
-    block = local_block_store.add_block(protocol, data, previous_block_hash)
+    # Add a genesis block and retrieve it by hash
+    added_block_hash = local_block_store.add_block(protocol, data, "")
+    retrieved_block = local_block_store.get_block(added_block_hash)
 
-    # Compute block hash
-    block_hash = LocalBlockStore.get_hash(block)
+    # Check if the retrieved block has the correct attributes
+    assert retrieved_block.protocol == protocol
+    assert retrieved_block.data == data
+    assert retrieved_block.previous_block_hash == ""
 
-    # Retrieve the block
-    retrieved_block = local_block_store.get_block(block_hash)
 
-    # Check if the retrieved block is the same as the original block
-    assert retrieved_block.protocol == block.protocol
-    assert retrieved_block.data == block.data
-    assert retrieved_block.previous_block_hash == block.previous_block_hash
+def test_add_and_retrieve_non_genesis_block(local_block_store):
+    """
+    Test adding a non-genesis block and retrieving it by hash.
+    A non-genesis block is any block added after the genesis block.
+    """
+    # Prepare test data
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add a genesis block
+    genesis_block_hash = local_block_store.add_block(protocol, data, "")
+
+    # Add a non-genesis block and retrieve it by hash
+    added_block_hash = local_block_store.add_block(protocol, data, genesis_block_hash)
+    retrieved_block = local_block_store.get_block(added_block_hash)
+
+    # Check if the retrieved block has the correct attributes
+    assert retrieved_block.protocol == protocol
+    assert retrieved_block.data == data
+    assert retrieved_block.previous_block_hash == genesis_block_hash
+
+
+def test_retrieve_non_existent_block(local_block_store):
+    """
+    Test retrieving a block that does not exist in the store.
+    """
+    non_existent_hash = "non_existent_hash"
+    assert local_block_store.get_block(non_existent_hash) is None
+
+
+def test_add_and_retrieve_block_by_index(local_block_store):
+    """
+    Test adding several blocks and retrieving them by index.
+    """
+    # Prepare test data
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add several blocks
+    previous_hash = ""
+    for i in range(3):
+        block_hash = local_block_store.add_block(protocol, data, previous_hash)
+        previous_hash = block_hash
+
+    # Retrieve the blocks by index and check if they have the correct attributes
+    for i in range(3):
+        block = local_block_store.get_block_by_index(i)
+        assert block.protocol == protocol
+        assert block.data == data
+
+    # Test retrieving a block by an invalid index
+    assert local_block_store.get_block_by_index(100) is None
+
+
+def test_add_block_with_invalid_previous_hash(local_block_store):
+    """
+    Test adding a block with an invalid previous hash.
+    An InvalidPreviousBlockHashError should be raised.
+    """
+    protocol = "test_protocol"
+    data = b"test_data"
+    previous_hash = "invalid_previous_block_hash"
+
+    local_block_store.add_block(protocol, data, "")
+
+    with pytest.raises(InvalidPreviousBlockHashError):
+        local_block_store.add_block(protocol, data, previous_hash)
+
+
+def test_add_multiple_genesis_blocks(local_block_store):
+    """
+    Test adding multiple genesis blocks.
+    An InvalidPreviousBlockHashError should be raised when trying to add a second genesis block.
+    """
+    protocol = "test_protocol"
+    data = b"test_data"
+    local_block_store.add_block(protocol, data, "")
+
+    with pytest.raises(InvalidPreviousBlockHashError):
+        local_block_store.add_block("another_protocol", data, "")
+
+
+def test_add_block_with_duplicate_hash(local_block_store):
+    """
+    Test adding a block with a hash that is already in the store.
+    An InvalidPreviousBlockHashError should be raised.
+    """
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add a genesis block
+    genesis_block_hash = local_block_store.add_block(protocol, data, "")
+
+    # Add another block
+    local_block_store.add_block(protocol, data, genesis_block_hash)
+
+    # Attempt to add a block with a duplicate hash
+    with pytest.raises(InvalidPreviousBlockHashError):
+        local_block_store.add_block(protocol, data, genesis_block_hash)
+
+
+def test_add_block_without_genesis_block(local_block_store):
+    """
+    Test adding a block when the genesis block is missing.
+    A MissingGenesisBlockError should be raised.
+    """
+    protocol = "test_protocol"
+    data = b"test_data"
+    previous_hash = "previous_block_hash"
+
+    with pytest.raises(MissingGenesisBlockError):
+        local_block_store.add_block(protocol, data, previous_hash)
+
+
+def test_block_hash(local_block_store):
+    """
+    Test whether the hash of a block, as returned by add_block, is correct.
+    """
+    # Prepare test data
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add a genesis block and check the hash
+    added_block_hash = local_block_store.add_block(protocol, data, "")
+    genesis_block = local_block_store.get_block(added_block_hash)
+    assert local_block_store.get_hash(genesis_block) == added_block_hash
+
+    # Check fixed hash value
+    assert (
+        added_block_hash
+        == "sha256:05025f9c69092f4cd88f318a4c588e8e50fb14d44ef693d1c1f881209fa91660"
+    )
+    # Add a few more blocks and check their hashes
+    previous_hash = added_block_hash
+    for _ in range(3):
+        added_block_hash = local_block_store.add_block(protocol, data, previous_hash)
+        block = local_block_store.get_block(added_block_hash)
+        assert local_block_store.get_hash(block) == added_block_hash
+        previous_hash = added_block_hash

@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11proto/block.proto\"I\n\nBasicBlock\x12\x1b\n\x13previous_block_hash\x18\x01 \x01(\t\x12\x10\n\x08protocol\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11proto/block.proto\"f\n\nBasicBlock\x12 \n\x13previous_block_hash\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x10\n\x08protocol\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x42\x16\n\x14_previous_block_hashb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'proto.block_pb2', globals())
@@ -21,5 +21,5 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _BASICBLOCK._serialized_start=21
-  _BASICBLOCK._serialized_end=94
+  _BASICBLOCK._serialized_end=123
 # @@protoc_insertion_point(module_scope)

@@ -227,3 +227,34 @@ def test_remove_block_by_index(local_block_store):
     # The blocks should no longer exist in the store
     for i in range(1, 3):
         assert local_block_store.get_block_by_index(i) is None
+
+
+def test_add_block_after_removal(local_block_store):
+    """
+    Test adding a block after a block has been removed.
+    The block index should be continuous.
+    """
+    # Prepare test data
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add several blocks
+    previous_hash = ""
+    added_block_hashes = []
+    for i in range(3):
+        block_hash = local_block_store.add_block(protocol, data, previous_hash)
+        added_block_hashes.append(block_hash)
+        previous_hash = block_hash
+
+    # Remove the block at index 1 by its hash and all blocks that follow it
+    local_block_store.remove_block(added_block_hashes[1])
+
+    # Add a new block
+    new_block_hash = local_block_store.add_block(protocol, data, added_block_hashes[0])
+
+    # Retrieve the new block by its hash
+    new_block = local_block_store.get_block(new_block_hash)
+    new_block_with_index = local_block_store.get_block_by_index(1)
+
+    # The new block should have index 1
+    assert new_block == new_block_with_index

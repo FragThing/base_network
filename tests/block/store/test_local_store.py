@@ -160,7 +160,7 @@ def test_block_hash(local_block_store):
     # Check fixed hash value
     assert (
         added_block_hash
-        == "sha256:05025f9c69092f4cd88f318a4c588e8e50fb14d44ef693d1c1f881209fa91660"
+        == "sha256:d0c7f548d3117670fbe890fe72e891851affcdea0b8f0b95444e7b2596296847"
     )
     # Add a few more blocks and check their hashes
     previous_hash = added_block_hash
@@ -258,3 +258,46 @@ def test_add_block_after_removal(local_block_store):
 
     # The new block should have index 1
     assert new_block == new_block_with_index
+
+
+def test_get_latest_block_by_index(local_block_store):
+    """
+    Test that the get_block_by_index function returns the latest block when the index is -1.
+    """
+    # Prepare test data
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add a block
+    first_block_hash = local_block_store.add_block(protocol, data, "")
+
+    # Add another block with explicit previous block hash
+    latest_block_hash = local_block_store.add_block(protocol, data, first_block_hash)
+
+    # Retrieve the latest block by specifying the index as -1
+    latest_block = local_block_store.get_block_by_index(-1)
+
+    # The hash of the latest block should match the hash of the block that was added last
+    assert local_block_store.get_hash(latest_block) == latest_block_hash
+
+
+def test_add_block_automatic_latest_hash(local_block_store):
+    """
+    Test that the add_block function automatically retrieves the hash of the latest block
+    if no previous_block_hash is specified.
+    """
+    # Prepare test data
+    protocol = "test_protocol"
+    data = b"test_data"
+
+    # Add the genesis block
+    genesis_block_hash = local_block_store.add_block(protocol, data)
+
+    # Add a new block without specifying the previous_block_hash
+    new_block_hash = local_block_store.add_block(protocol, data)
+
+    # Retrieve the new block by its hash
+    new_block = local_block_store.get_block(new_block_hash)
+
+    # The previous_block_hash of the new block should be the hash of the genesis block
+    assert new_block.previous_block_hash == genesis_block_hash

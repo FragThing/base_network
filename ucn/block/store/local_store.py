@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Engine, select
 from sqlalchemy.orm import Session
-from ucn.proto.block_pb2 import BasicBlock
 from ..error import InvalidPreviousBlockHashError, MissingGenesisBlockError
+from ..data.basic_block import BasicBlock
 from .models import init_database, get_block_model
 from .base_store import BaseBlockStore
 
@@ -13,8 +13,10 @@ class LocalBlockStore(BaseBlockStore):
         init_database(self.engine)
 
     def add_block(
-        self, protocol: str, data: bytes, previous_block_hash: str
+        self, protocol: str, data: bytes, previous_block_hash: str = None
     ) -> str:  # Return type has been changed from BasicBlock to str.
+        if previous_block_hash is None:
+            previous_block_hash = self.get_latest_block_hash()
         block = BasicBlock(
             protocol=protocol,
             previous_block_hash=previous_block_hash,
@@ -102,6 +104,13 @@ class LocalBlockStore(BaseBlockStore):
                     data=block_model.data,
                 )
         return None
+
+    def get_latest_block_hash(self) -> str:
+        block = self.get_block_by_index(-1)
+        if block:
+            return self.get_hash(block)
+        else:
+            return ""
 
     def get_block_count(self) -> int:
         with Session(self.engine) as session:

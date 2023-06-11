@@ -12,15 +12,16 @@ message PublicKey {
 // Additional blocks can be added for extensibility.
 message AccountBlock {
   int64 creation_time = 1; // The creation timestamp of the account
+  int64 encode_algo = 2;   // The algo of encode url
   repeated PublicKey public_keys =
-      2; // A list of public keys associated with the account
+      3; // A list of public keys associated with the account
 }
 
 // The AdditionalBlock message represents additional blocks that can be added to
 // an account. It includes the block's protocol, the hash of the
 // account block it's associated with, and data.
 message AdditionalBlock {
-  string protocol = 1;           // The protocol used for this block
-  string account_block_hash = 2; // The hash of the associated account block
-  bytes data = 3;                // The data contained in this block
+  string account_url = 1; // The hash of the associated account block
+  string protocol = 2;    // The protocol used for this block
+  bytes data = 3;         // The data contained in this block
 }

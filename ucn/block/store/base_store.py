@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 import hashlib
 from google.protobuf import message
 
-from ucn.proto.block_pb2 import BasicBlock
+from ucn.block.data.basic_block import BasicBlock
 
 
 class BaseBlockStore(metaclass=ABCMeta):
@@ -35,12 +35,9 @@ class BaseBlockStore(metaclass=ABCMeta):
 
     @staticmethod
     def get_hash(block: BasicBlock) -> str:
-        # Ensure block is a protobuf message
-        if not isinstance(block, message.Message):
-            raise ValueError("block must be a protobuf message")
 
         # Get binary representation of block
-        block_bin = block.SerializeToString()
+        block_bin = block.serialize()
 
         # Compute and return hash
         return f"sha256:{hashlib.sha256(block_bin).hexdigest()}"

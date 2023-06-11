@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13proto/account.proto\"+\n\tPublicKey\x12\x11\n\talgorithm\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\x0c\"F\n\x0c\x41\x63\x63ountBlock\x12\x15\n\rcreation_time\x18\x01 \x01(\x03\x12\x1f\n\x0bpublic_keys\x18\x02 \x03(\x0b\x32\n.PublicKey\"M\n\x0f\x41\x64\x64itionalBlock\x12\x10\n\x08protocol\x18\x01 \x01(\t\x12\x1a\n\x12\x61\x63\x63ount_block_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13proto/account.proto\"+\n\tPublicKey\x12\x11\n\talgorithm\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\x0c\"[\n\x0c\x41\x63\x63ountBlock\x12\x15\n\rcreation_time\x18\x01 \x01(\x03\x12\x13\n\x0b\x65ncode_algo\x18\x02 \x01(\x03\x12\x1f\n\x0bpublic_keys\x18\x03 \x03(\x0b\x32\n.PublicKey\"F\n\x0f\x41\x64\x64itionalBlock\x12\x10\n\x08protocol\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63ount_url\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'proto.account_pb2', globals())
@@ -23,7 +23,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _PUBLICKEY._serialized_start=23
   _PUBLICKEY._serialized_end=66
   _ACCOUNTBLOCK._serialized_start=68
-  _ACCOUNTBLOCK._serialized_end=138
-  _ADDITIONALBLOCK._serialized_start=140
-  _ADDITIONALBLOCK._serialized_end=217
+  _ACCOUNTBLOCK._serialized_end=159
+  _ADDITIONALBLOCK._serialized_start=161
+  _ADDITIONALBLOCK._serialized_end=231
 # @@protoc_insertion_point(module_scope)
